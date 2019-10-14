@@ -34,7 +34,7 @@ var shuffled_fruits = shuffle(fruitsAlpha);
 var fruits = shuffled_fruits.map(function (each_fruit) {
     return "./images/" + each_fruit + ".png";
 });
-var fruitsIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41];
+var fruitsIndex = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39];
 
 var groupedFruits = [];
 var temp = [];
@@ -47,6 +47,38 @@ for (var i = 0; i < fruitType.length; i++) {
     }
     groupedFruits.push(temp);
     temp = [];
+}
+
+function checkFruit(fru) {
+    var val = fru.filter(function (e) {
+        return e !== null;
+    });
+    var fruitsPlayed = val.map(function (e) {
+        return e * 1;
+    });
+    var returnFruits = [];
+    var counter = [];
+    for (var p = 0; p < groupedFruits.length; p++) {
+        for (var x = 0; x < groupedFruits[p].length; x++) {
+            if (fruitsPlayed.includes(groupedFruits[p][x])) {
+                counter.push(groupedFruits[p][x]);
+            }
+        }
+        if (counter.length >= 2) {
+            var new_fruits_left = fruitsPlayed.filter(function (e) {
+                return !counter.includes(e);
+            });
+            for (var m = 0; m < new_fruits_left.length; m++) {
+                returnFruits[new_fruits_left[m]] = new_fruits_left[m];
+            }
+
+            return returnFruits;
+        }
+
+        counter = [];
+        returnFruits = [];
+    }
+    return fru;
 }
 
 var className = "btn btn-pulse white";
@@ -74,8 +106,8 @@ var FruitButtons = function (_React$Component) {
         value: function render() {
             var _this2 = this;
 
-            var fruitNum = this.props.fruitNum;
-            var num_display = this.props.display;
+            var num_display = this.props.buttonIndex;
+            var fruit_num = this.props.display;
             return React.createElement(
                 "div",
                 null,
@@ -83,7 +115,7 @@ var FruitButtons = function (_React$Component) {
                     return React.createElement(
                         "button",
                         { key: e, value: e, className: className, onClick: _this2.openFruit },
-                        React.createElement("img", { src: fruits[fruitNum[e]] })
+                        React.createElement("img", { src: fruits[fruit_num[e]] })
                     );
                 })
             );
@@ -101,7 +133,7 @@ var FruitFaceGame = function (_React$Component2) {
 
         var _this3 = _possibleConstructorReturn(this, (FruitFaceGame.__proto__ || Object.getPrototypeOf(FruitFaceGame)).call(this, props));
 
-        _this3.state = { fruits: [], last: '' };
+        _this3.state = { fruits: [], last: '', start: 0 };
         _this3.openFruit = _this3.openFruit.bind(_this3);
         return _this3;
     }
@@ -109,65 +141,71 @@ var FruitFaceGame = function (_React$Component2) {
     // componentDidMount(){
     //     //if the component have been set on the DOM following several operations, retirve the new filtered fruits Num and set the state for the new fruits Num
     //     //only mount when the isnt a null item from local storage
+    //     var json=localStorage.getItem("fruits_to_show")
+    //     var obj_fruits=JSON.parse(json);
+    //     if(obj_fruits){
+    //         this.setState({ fruits: obj_fruits });
+    //     }
+
+
     // }
 
+    // componentDidUpdate(prevProps,prevState){
+    //     //since the user has opened a fruit, lets filter off and save the value into a local storage 
+    //     let val=this.state.fruits.filter(e=>e!==null);
+    //     let fruitsPlayed=val.map(e=>e*1);
+    //     var counter = []
+    //     for (let p = 0; p < groupedFruits.length; p++) {
+    //         for (let x = 0; x < groupedFruits[p].length; x++) {
+    //             if (fruitsPlayed.includes(groupedFruits[p][x])) {
+    //                 counter.push(groupedFruits[p][x])
+    //             }
+    //         }
+    //         if (counter.length >= 2) {
+    //             var new_fruits_left = fruitsPlayed.filter(e => !counter.includes(e))
+    //             break;
+    //         }
+    //         counter = []
+    //     }
+
+    //     if(new_fruits_left){
+    //         //save to local storage
+    //         var json=JSON.stringify(new_fruits_left);
+    //         localStorage.setItem("fruits_to_show",json);
+    //         window.location.reload();
+    //     }
+
+    // }
+
+
     _createClass(FruitFaceGame, [{
-        key: "componentDidUpdate",
-        value: function componentDidUpdate(prevProps, prevState) {
-            //since the user has opened a fruit, lets filter off and save the value into a local storage 
-            var val = this.state.fruits.filter(function (e) {
-                return e !== null;
-            });
-            var fruitsPlayed = val.map(function (e) {
-                return e * 1;
-            });
-            var counter = [];
-            for (var p = 0; p < groupedFruits.length; p++) {
-                for (var x = 0; x < groupedFruits[p].length; x++) {
-                    if (fruitsPlayed.includes(groupedFruits[p][x])) {
-                        counter.push(groupedFruits[p][x]);
-                    }
-                }
-                if (counter.length >= 2) {
-                    var new_fruits_left = fruitsPlayed.filter(function (e) {
-                        return !counter.includes(e);
-                    });
-                    break;
-                }
-                counter = [];
-            }
-
-            if (new_fruits_left) {
-                //save to local storage
-                var json = JSON.stringify(new_fruits_left);
-                localStorage.setItem("fruits_to_show", json);
-            }
-
-            //filter off the fruits which has similar marking -making sure to check the fruits array as target groupedFruits
-            //save the new filter to localStorage,...
-
-
-            // let nn = this.state.display.filter((e) => !value.includes(e));
-            // console.log(nn);
-        }
-    }, {
         key: "openFruit",
         value: function openFruit(fruit_to_open) {
             //save the fruit_to_open num in fruits
             var open_fruit = this.state.fruits;
             open_fruit[fruit_to_open] = fruit_to_open;
             this.setState({ fruits: open_fruit, last: fruit_to_open });
+            var that = this;
+            setTimeout(function () {
+                //do something once
+                var answ = checkFruit(open_fruit);
+                that.setState(function () {
+                    return {
+                        fruits: answ
+                    };
+                });
+            }, 1000);
         }
     }, {
         key: "render",
         value: function render() {
-            var fruitNum = this.state.fruits;
             var lastPlayed = this.state.last;
+            var fruit_numbers = this.state.fruits;
 
             return React.createElement(
                 "div",
                 null,
-                React.createElement(FruitButtons, { fruitNum: fruitNum, openFruit: this.openFruit, display: fruitsIndex })
+                React.createElement(FruitButtons, { buttonIndex: fruitsIndex, openFruit: this.openFruit, display: fruit_numbers, keep: fruit_numbers })
             );
         }
     }]);
