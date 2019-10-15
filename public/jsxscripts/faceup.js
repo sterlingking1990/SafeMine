@@ -1,5 +1,12 @@
 const fruitsAlpha = ["orange", "apple", "watermelon", "pineapple", "mango", "pawpaw", "strawberry", "guava", "melon", "banana", "orange", "apple", "watermelon", "pineapple", "mango", "pawpaw", "strawberry", "guava", "melon", "banana", "orange", "apple", "watermelon", "pineapple", "mango", "pawpaw", "strawberry", "guava", "melon", "banana", "orange", "apple", "watermelon", "pineapple", "mango", "pawpaw", "strawberry", "guava", "melon", "banana"]
 const filtered_fruit_marks = ["good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good", "good"]
+const intuition_level={
+    0:"Intuitive",
+    5:"Gut",
+    10:"Hearty",
+    15:"Visionary",
+    20:"Connected Wisdom"
+}
 const disable_filtered_fruits_marks = [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true]
 function shuffle(array){
         var currentIndex = array.length, temporaryValue, randomIndex;
@@ -85,9 +92,6 @@ function checkFruit(fru){
     return fru;
 }
 
-const className="btn btn-pulse white";
-const fb="fa fa-facebook"
-
 class FruitButtons extends React.Component {
 
     constructor(props){
@@ -121,65 +125,45 @@ class FruitButtons extends React.Component {
 class FruitFaceGame extends React.Component{
     constructor(props){
         super(props);
-        this.state={fruits:[],last:'',start:0}
+        this.state={fruits:[],played:0,won:0,intuition_level:''}
         this.openFruit=this.openFruit.bind(this);
     }
 
-    // componentDidMount(){
-    //     //if the component have been set on the DOM following several operations, retirve the new filtered fruits Num and set the state for the new fruits Num
-    //     //only mount when the isnt a null item from local storage
-    //     var json=localStorage.getItem("fruits_to_show")
-    //     var obj_fruits=JSON.parse(json);
-    //     if(obj_fruits){
-    //         this.setState({ fruits: obj_fruits });
-    //     }
-        
-        
+    resetGame(){
+        localStorage.clear("removed_fruits")
+        localStorage.clear("shuffled_fruits")
+        localStorage.clear("played")
+        window.location.reload();
+        console.log("fninshed loading");
 
-    // }
-
-    // componentDidUpdate(prevProps,prevState){
-    //     //since the user has opened a fruit, lets filter off and save the value into a local storage 
-    //     let val=this.state.fruits.filter(e=>e!==null);
-    //     let fruitsPlayed=val.map(e=>e*1);
-    //     var counter = []
-    //     for (let p = 0; p < groupedFruits.length; p++) {
-    //         for (let x = 0; x < groupedFruits[p].length; x++) {
-    //             if (fruitsPlayed.includes(groupedFruits[p][x])) {
-    //                 counter.push(groupedFruits[p][x])
-    //             }
-    //         }
-    //         if (counter.length >= 2) {
-    //             var new_fruits_left = fruitsPlayed.filter(e => !counter.includes(e))
-    //             break;
-    //         }
-    //         counter = []
-    //     }
-        
-    //     if(new_fruits_left){
-    //         //save to local storage
-    //         var json=JSON.stringify(new_fruits_left);
-    //         localStorage.setItem("fruits_to_show",json);
-    //         window.location.reload();
-    //     }
-        
-    // }
-
-
-
+    }
 
     openFruit(fruit_to_open){
+        //get the played from local storage, update and set state
+        var played=localStorage.getItem("played");
+        if(played==null) played=0;
+        var play_amount=parseInt(played,10)+1;
+        localStorage.setItem("played",play_amount);
+
+
+        //get removed_fruits from storage, filter off and get count of numbers won
+        var fruits_removed = JSON.parse(localStorage.getItem("removed_fruits"));
+        if(fruits_removed==null) fruits_removed=[];
+        var count_removed = fruits_removed ? fruits_removed.filter(e => e !== null) : [];
+        var won_fruits = count_removed.length
+        var intuition=intuition_level[won_fruits];
         //save the fruit_to_open num in fruits
         const open_fruit=this.state.fruits;
         open_fruit[fruit_to_open]=fruit_to_open;
-        this.setState({ fruits: open_fruit, last: fruit_to_open })
+        this.setState({ fruits: open_fruit, last: fruit_to_open,played:play_amount,won:won_fruits,intuition_level:intuition })
         var that=this;
         setTimeout(function () {
-            //do something once
+            //update the new fruits numbers after certain secs
             var answ = checkFruit(open_fruit);
             that.setState(()=>{
                 return {
-                    fruits: answ
+                    fruits: answ,
+                    won:won_fruits
                 }})
         }, 1000);
     }
@@ -189,11 +173,16 @@ class FruitFaceGame extends React.Component{
 
 
     render(){
-        var lastPlayed=this.state.last;
+        var played=this.state.played;
+        var won=this.state.won;
         var fruit_numbers=this.state.fruits;
+        var intuition=this.state.intuition_level;
+        var replay="replay";
+
         
         return(
             <div>
+                <p className="flow-text center-align">Played: {played} Won: {won} Intuition: {intuition ? intuition : "Intuitive"}<span><button onClick={this.resetGame.bind(this)}><i className="material-icons">replay</i></button></span></p>
                 <FruitButtons buttonIndex={fruitsIndex} openFruit={this.openFruit} display={fruit_numbers}/>
             </div>
 
